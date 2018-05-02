@@ -1,0 +1,16 @@
+#cloud-config
+password: qwerty
+chpasswd: { expire: False }
+ssh_authorized_keys:
+ - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC6PedIiE2UtIiqNjk92ubiZNyJj93aGfvshj7PKvDfGdrR5pJpug2yf/yGEf+NJyH1WbHliFDZV7Qm6b3gb8uvuCx8QqJVQO/CCe9FUAW093FtRaaJyI63MCWiihFvSZqb69iSWK51p2EpviYlXAb78X225iBJfTGUhods4p/Tg1r1OFFwClyJKVRumzl79pxXD6//5i1v9BD9hSOgFSZMVdqVvn7qQpJQ9Qa5tY/CRWW9hi70u+fJNwI6PXkbByI7dpgldNJtpBHQ+1US6cpQD4oLxwL7HUWEitJI0JwLQl7WIRHK35i3eg8d6SB0WVs2divVN8VGL3Z60QVxoFYB root@user
+runcmd:
+ - echo 1 > /proc/sys/net/ipv4/ip_forward
+ - iptables -t nat -A POSTROUTING -o ens3 -j MASQUERADE
+ - ip link add vxlan0 type vxlan id 12345 remote 192.168.124.102 local 192.168.124.101 dstport 4789
+ - ip link set vxlan0 up
+ - ip addr add 10.255.0.101/24 dev vxlan0
+ - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+ - apt-key fingerprint 0EBFCD88
+ - add-apt-repository 'deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable'
+ - apt-get update
+ - apt-get install docker-ce -y

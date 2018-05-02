@@ -1,0 +1,16 @@
+instance-id: vm1-123
+hostname: vm1
+local-hostname: vm1
+network-interfaces: |
+  auto ens3
+  iface ens3 inet dhcp
+  
+  auto ens4
+  iface ens4 inet static
+  address 192.168.124.101
+  netmask 255.255.255.0
+  
+  auto ens5 
+  iface ens5 inet static
+  address 192.168.125.101
+  netmask 255.255.255.0
