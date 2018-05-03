@@ -3,7 +3,7 @@
 password: qwerty
 chpasswd: { expire: False }
 ssh_authorized_keys:
- - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC6PedIiE2UtIiqNjk92ubiZNyJj93aGfvshj7PKvDfGdrR5pJpug2yf/yGEf+NJyH1WbHliFDZV7Qm6b3gb8uvuCx8QqJVQO/CCe9FUAW093FtRaaJyI63MCWiihFvSZqb69iSWK51p2EpviYlXAb78X225iBJfTGUhods4p/Tg1r1OFFwClyJKVRumzl79pxXD6//5i1v9BD9hSOgFSZMVdqVvn7qQpJQ9Qa5tY/CRWW9hi70u+fJNwI6PXkbByI7dpgldNJtpBHQ+1US6cpQD4oLxwL7HUWEitJI0JwLQl7WIRHK35i3eg8d6SB0WVs2divVN8VGL3Z60QVxoFYB root@user
+ - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDTOfQGJL9srXp3eAtUiIK+G2Wqf6xqn2ODBIW0mcz0/3yUSkZIhCmiu3KteGNx3m5O1LAyh9NzIL8usj0g3KURcvl5KZOnlxZiEOt5Z6u4FLE4RjKQ6v4kFASAfSCVixNwPVhK/PcxxOCb4/GjXHLsycQuO3Kbf1bc5bocUIRZeVSGyqEbmcusCVNIx07ONMlV4wOzCUKjSkloaK0IinRHS6vyrz+7tD9ZUO9tNwzgad2srFoUGgW2aBcPIDQMNlqBqoXywht1XSiUgID5f3YwRsBvqb5RLVBIyT9tIuElfFSXbFaqwTaNuVEbkq7lGmo5P+oLHaYg0hy0EJSQn/Bd root@user
 runcmd:
  - echo nameserver 8.8.8.8  > /etc/resolv.conf
  - echo 127.0.0.1 vm2 >> /etc/hosts

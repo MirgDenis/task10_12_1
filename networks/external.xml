@@ -4,7 +4,7 @@
   <ip address='192.168.123.1' netmask='255.255.255.0'>
     <dhcp>
       <range start='192.168.123.2' end='192.168.123.254'/>
-      <host mac='52:54:00:11:6a:7e' name='vm1' ip='192.168.123.101'/>
+      <host mac='52:54:00:c1:b7:5b' name='vm1' ip='192.168.123.101'/>
     </dhcp>
   </ip>
 </network>
