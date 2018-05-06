@@ -79,7 +79,7 @@ network-interfaces: |
   address ${VM2_INTERNAL_IP}
   netmask ${INTERNAL_NET_MASK}
   gateway ${VM1_INTERNAL_IP}
-  dns-nameserver ${VM_DNS}
+  dns-nameservers ${VM_DNS}
   
   auto ${VM2_MANAGEMENT_IF} 
   iface ${VM2_MANAGEMENT_IF} inet static
@@ -94,7 +94,6 @@ chpasswd: { expire: False }
 ssh_authorized_keys:
  - `cat ${SSH_PUB_KEY}`
 runcmd:
- - echo nameserver ${VM_DNS}  > /etc/resolv.conf
  - echo 127.0.0.1 ${VM2_NAME} >> /etc/hosts
  - ip link add ${VXLAN_IF} type vxlan id ${VID} remote ${VM1_INTERNAL_IP} local ${VM2_INTERNAL_IP} dstport 4789
  - ip link set ${VXLAN_IF} up
@@ -116,7 +115,7 @@ virsh net-start internal
 virsh net-start management
 
 #Download image and create disks
-wget -O /var/lib/libvirt/images/ubuntu-server-16.04.qcow2 ${VM_BASE_IMAGE}
+#wget -O /var/lib/libvirt/images/ubuntu-server-16.04.qcow2 ${VM_BASE_IMAGE}
 mkdir /var/lib/libvirt/images/vm1
 mkdir /var/lib/libvirt/images/vm2
 cp /var/lib/libvirt/images/ubuntu-server-16.04.qcow2 /var/lib/libvirt/images/vm1/vm1.qcow2
@@ -137,7 +136,7 @@ virt-install --connect qemu:///system \
 --network network=${INTERNAL_NET_NAME} \
 --network network=${MANAGEMENT_NET_NAME} \
 --graphics vnc,port=-1 \
---noautoconsole --virt-type kvm --import
+--noautoconsole --virt-type ${VM_VIRT_TYPE} --import
 
 #Install VM2
 virt-install --connect qemu:///system \
@@ -149,4 +148,4 @@ virt-install --connect qemu:///system \
 --network network=${INTERNAL_NET_NAME} \
 --network network=${MANAGEMENT_NET_NAME} \
 --graphics vnc,port=-1 \
---noautoconsole --virt-type kvm --import
+--noautoconsole --virt-type ${VM_VIRT_TYPE} --import

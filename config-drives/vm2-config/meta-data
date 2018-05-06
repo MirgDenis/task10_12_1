@@ -7,7 +7,7 @@ network-interfaces: |
   address 192.168.124.102
   netmask 255.255.255.0
   gateway 192.168.124.101
-  dns-nameserver 8.8.8.8
+  dns-nameservers 8.8.8.8
   
   auto ens4 
   iface ens4 inet static
