@@ -27,15 +27,13 @@ echo "<network>
   <ip address='${MANAGEMENT_HOST_IP}' netmask='${MANAGEMENT_NET_MASK}'/>
 </network>" > $dir/networks/management.xml
 
-#Generate ssh key
-mkdir `cat $dir/config | grep "SSH_PUB_KEY" | grep -o "\/.*\/"`
-ssh-keygen -t rsa -N "" -f `cat $dir/config | grep "SSH_PUB_KEY" | grep -o "\/.*\id_rsa"`
-
 #VM1-config 
 #meta-data
 echo "instance-id: vm1-123
 hostname: ${VM1_NAME}
 local-hostname: ${VM1_NAME}
+public-keys:
+ - `cat ${SSH_PUB_KEY}`
 network-interfaces: |
   auto ${VM1_EXTERNAL_IF}
   iface ${VM1_EXTERNAL_IF} inet dhcp
@@ -51,28 +49,26 @@ network-interfaces: |
   netmask ${MANAGEMENT_NET_MASK}" > $dir/config-drives/vm1-config/meta-data
 
 #user-data
-echo "#cloud-config
-password: qwerty
-chpasswd: { expire: False }
-ssh_authorized_keys:
- - `cat ${SSH_PUB_KEY}`
-runcmd:
- - echo 1 > /proc/sys/net/ipv4/ip_forward
- - iptables -t nat -A POSTROUTING -o ${VM1_EXTERNAL_IF} -j MASQUERADE
- - ip link add ${VXLAN_IF} type vxlan id ${VID} remote ${VM2_INTERNAL_IP} local ${VM1_INTERNAL_IP} dstport 4789
- - ip link set ${VXLAN_IF} up
- - ip addr add ${VM1_VXLAN_IP}/24 dev ${VXLAN_IF}
- - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
- - apt-key fingerprint 0EBFCD88
- - add-apt-repository 'deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable'
- - apt-get update
- - apt-get install docker-ce -y" > $dir/config-drives/vm1-config/user-data
+echo "#!/bin/bash
+
+echo 1 > /proc/sys/net/ipv4/ip_forward
+iptables -t nat -A POSTROUTING -o ${VM1_EXTERNAL_IF} -j MASQUERADE
+ip link add ${VXLAN_IF} type vxlan id ${VID} remote ${VM2_INTERNAL_IP} local ${VM1_INTERNAL_IP} dstport 4789
+ip link set ${VXLAN_IF} up
+ip addr add ${VM1_VXLAN_IP}/24 dev ${VXLAN_IF}
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+apt-key fingerprint 0EBFCD88
+add-apt-repository 'deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable'
+apt-get update
+apt-get install docker-ce -y" > $dir/config-drives/vm1-config/user-data
 
 #VM2-config
 #meta-data
 echo "instance-id: vm2-123
 hostname: ${VM2_NAME}
 local-hostname: ${VM2_NAME}
+public-keys:
+ - `cat ${SSH_PUB_KEY}`
 network-interfaces: |
   auto ${VM2_INTERNAL_IF}
   iface ${VM2_INTERNAL_IF} inet static
@@ -86,23 +82,17 @@ network-interfaces: |
   address ${VM2_MANAGEMENT_IP}
   netmask ${MANAGEMENT_NET_MASK}" > $dir/config-drives/vm2-config/meta-data
 
-#user-data ##dns-nameserver dont working so echo to resolv.conf and echo to hosts for sudo##
-echo "
-#cloud-config
-password: qwerty
-chpasswd: { expire: False }
-ssh_authorized_keys:
- - `cat ${SSH_PUB_KEY}`
-runcmd:
- - echo 127.0.0.1 ${VM2_NAME} >> /etc/hosts
- - ip link add ${VXLAN_IF} type vxlan id ${VID} remote ${VM1_INTERNAL_IP} local ${VM2_INTERNAL_IP} dstport 4789
- - ip link set ${VXLAN_IF} up
- - ip addr add ${VM2_VXLAN_IP}/24 dev ${VXLAN_IF}
- - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
- - sudo apt-key fingerprint 0EBFCD88
- - sudo add-apt-repository 'deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable'
- - sudo apt-get update
- - sudo apt-get install docker-ce -y" > $dir/config-drives/vm2-config/user-data
+#user-data
+echo "#!/bin/bash
+
+ip link add ${VXLAN_IF} type vxlan id ${VID} remote ${VM1_INTERNAL_IP} local ${VM2_INTERNAL_IP} dstport 4789
+ip link set ${VXLAN_IF} up
+ip addr add ${VM2_VXLAN_IP}/24 dev ${VXLAN_IF}
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+apt-key fingerprint 0EBFCD88
+add-apt-repository 'deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable'
+apt-get update
+apt-get install docker-ce -y" > $dir/config-drives/vm2-config/user-data
 
 #Create networks
 virsh net-define $dir/networks/external.xml
@@ -115,7 +105,7 @@ virsh net-start internal
 virsh net-start management
 
 #Download image and create disks
-#wget -O /var/lib/libvirt/images/ubuntu-server-16.04.qcow2 ${VM_BASE_IMAGE}
+wget -O /var/lib/libvirt/images/ubuntu-server-16.04.qcow2 ${VM_BASE_IMAGE}
 mkdir /var/lib/libvirt/images/vm1
 mkdir /var/lib/libvirt/images/vm2
 cp /var/lib/libvirt/images/ubuntu-server-16.04.qcow2 /var/lib/libvirt/images/vm1/vm1.qcow2
